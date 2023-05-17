@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import * as THREE from 'three';
 
 export default function Home() {
   return (
