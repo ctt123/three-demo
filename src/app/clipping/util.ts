@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import Stats from 'three/addons/libs/stats.module.js';
+import {DoubleSide, Mesh, MeshBasicMaterial, PlaneGeometry, Vector3} from "three";
 
 export const draw = ()=>{
     let camera, scene, renderer, object, stats;
@@ -13,21 +14,21 @@ export const draw = ()=>{
         animate: false,
         planeX: {
 
-            constant: 0,
+            constant: 1,
             negated: false,
             displayHelper: false
 
         },
         planeY: {
 
-            constant: 0,
+            constant: 1,
             negated: false,
             displayHelper: false
 
         },
         planeZ: {
 
-            constant: 0,
+            constant: 1,
             negated: false,
             displayHelper: false
 
@@ -40,6 +41,7 @@ export const draw = ()=>{
     animate();
 
     function createPlaneStencilGroup( geometry, plane, renderOrder ) {
+        console.log('createPlaneStencilGroup::', createPlaneStencilGroup)
 
         const group = new THREE.Group();
         const baseMat = new THREE.MeshBasicMaterial();
@@ -85,12 +87,12 @@ export const draw = ()=>{
         scene = new THREE.Scene();
 
         camera = new THREE.PerspectiveCamera( 36, window.innerWidth / window.innerHeight, 1, 100 );
-        camera.position.set( 2, 2, 2 );
+        camera.position.set( 0, 10, 0 );
 
         scene.add( new THREE.AmbientLight( 0xffffff, 0.5 ) );
 
         const dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
-        dirLight.position.set( 5, 10, 7.5 );
+        dirLight.position.set( 0, 10, 0 );
         dirLight.castShadow = true;
         dirLight.shadow.camera.right = 2;
         dirLight.shadow.camera.left = - 2;
@@ -102,9 +104,9 @@ export const draw = ()=>{
         scene.add( dirLight );
 
         planes = [
-            new THREE.Plane( new THREE.Vector3( - 1, 0, 0 ), 0 ),
-            new THREE.Plane( new THREE.Vector3( 0, - 1, 0 ), 0 ),
-            new THREE.Plane( new THREE.Vector3( 0, 0, - 1 ), 0 )
+            new THREE.Plane( new THREE.Vector3( -1, 0, 0 ), 1 ),
+            new THREE.Plane( new THREE.Vector3( 0, - 1, 0 ), 1 ),
+            new THREE.Plane( new THREE.Vector3( 0, 0, - 1 ), 1 )
         ];
 
         planeHelpers = planes.map( p => new THREE.PlaneHelper( p, 2, 0xffffff ) );
@@ -127,6 +129,7 @@ export const draw = ()=>{
 
             const poGroup = new THREE.Group();
             const plane = planes[ i ];
+            console.log('plane:::', plane)
             const stencilGroup = createPlaneStencilGroup( geometry, plane, i + 1 );
 
             // plane is clipped by the other clipping planes
@@ -248,6 +251,14 @@ export const draw = ()=>{
         } );
         planeZ.open();
 
+
+
+
+        // 添加面板
+        const clipMask = createPlane(new Vector3(0,0,0.2),10,10)
+        scene.add(clipMask)
+        planes[ 2 ].constant=0.2
+
     }
 
     function onWindowResize() {
@@ -290,4 +301,21 @@ export const draw = ()=>{
         stats.end();
 
     }
+}
+
+export const createPlane = ( position: Vector3, width: number, height: number ) =>{
+    let geo = new PlaneGeometry(width, height)
+    let material = new MeshBasicMaterial({
+        color: 0x2375E1,
+        side: DoubleSide,
+        opacity: 0.1,
+        transparent: true,
+        depthTest: false     // fix: 某些角度下，后面的线框未显示
+    })
+
+    let plane = new Mesh(geo, material)
+    if (position) {
+        plane.position.copy(position)
+    }
+    return plane
 }

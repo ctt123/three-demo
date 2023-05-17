@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Three.js Cube Clipping</title>
+    <style>
+        body { margin: 0; }
+    </style>
+</head>
+<body>
+<script src="https://threejs.org/build/three.js"></script>
+<script>
+    // 创建场景、相机和渲染器
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // 创建一个立方体
+    var geometry = new THREE.BoxGeometry(1, 1, 1);
+    var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+    var cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+
+    // 创建剖切平面
+    var planeGeometry = new THREE.PlaneGeometry(1.5, 1.5);
+    var planeMaterial = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide});
+    var clippingPlane = new THREE.Mesh(planeGeometry, planeMaterial);
+    scene.add(clippingPlane);
+
+    // 设置剖切平面的位置和旋转
+    clippingPlane.position.set(0, 0, 0.5);
+    clippingPlane.rotation.x = Math.PI / 4;
+
+    // 设置剖切属性
+    var localPlane = new THREE.Plane();
+    var globalPlane = new THREE.Plane();
+    var cubeMaterial = cube.material;
+
+    // 更新剖切属性并渲染场景
+    function updateClipping() {
+        clippingPlane.updateMatrixWorld();
+        globalPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 0, 1).applyMatrix4(clippingPlane.matrixWorld), clippingPlane.position);
+
+        localPlane.copy(globalPlane).applyMatrix4(cube.matrixWorld);
+        cubeMaterial.clippingPlanes = [localPlane];
+        cubeMaterial.clipShadows = true;
+
+        renderer.render(scene, camera);
+    }
+
+    // 相机初始化
+    camera.position.z = 5;
+
+    // 监听窗口大小变化事件
+    window.addEventListener('resize', function() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        updateClipping();
+    });
+
+    // 渲染循环
+    function animate() {
+        requestAnimationFrame(animate);
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+        updateClipping();
+    }
+    animate();
+</script>
+</body>
+</html>
