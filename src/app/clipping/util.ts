@@ -3,7 +3,119 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import Stats from 'three/addons/libs/stats.module.js';
 import {DoubleSide, Mesh, MeshBasicMaterial, PlaneGeometry, Vector3} from "three";
+import { SVGRenderer } from 'three/addons/renderers/SVGRenderer.js';
+// 创建圆形
+const getCircle = ()=>{
+    const geometry = new THREE.CircleGeometry(1, 32);
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const circle = new THREE.Mesh(geometry, material);
+    return circle;
+}
 
+const getLineLoop = () => {
+    const geometry = new THREE.BufferGeometry();
+    const material = new THREE.LineBasicMaterial({
+        color: 0xffffff
+    })
+    const lineLoop = new THREE.LineLoop(geometry, material)
+    return lineLoop
+}
+
+export const drawCircle = () => {
+    // Create a scene
+    const scene = new THREE.Scene();
+
+    // Create a camera
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.x = 0;
+    camera.position.y = 5;
+    camera.position.z = 0;
+
+    // const light = new THREE.DirectionalLight( 0xffffff );
+    // const light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
+    // light.position.set( 10, 10, -1 );
+    const light = new THREE.PointLight( 0xff0000, 1, 100 );
+    light.position.set( 50, 50, 50 );
+    // Create a renderer
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Create the first circle
+    // const circleGeometry1 = new THREE.CircleGeometry(1, 32);
+    // const circleMaterial1 = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    // const circle1 = new THREE.Mesh(circleGeometry1, circleMaterial1);
+    // circle1.position.set(0, 0, 0);
+    // // circle1.rotation.z=Math.PI/3
+    // scene.add(circle1);
+
+    // 一个正方体
+    const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    const cube = new THREE.Mesh( geometry, material );
+    scene.add( cube );
+
+
+    // Create the second circle
+    // const circleGeometry2 = new THREE.CircleGeometry(1, 32);
+    // const circleMaterial2 = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    // const circle2 = new THREE.Mesh(circleGeometry2, circleMaterial2);
+    // circle2.position.set(1, 0, 0);
+    // scene.add(circle2);
+
+    // Render the scene
+    function render() {
+        requestAnimationFrame(render);
+        renderer.render(scene, camera);
+    }
+    render();
+}
+
+
+
+export const render = () => {
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    camera.position.set( 10, 10, 10 );
+
+    const light = new THREE.DirectionalLight( 0xffffff );
+    light.position.set( 0, 10, 10 );
+    scene.add( light );
+
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    document.body.appendChild( renderer.domElement );
+
+    // 画了一个正方体
+    // const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    // const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    // const cube = new THREE.Mesh( geometry, material );
+    // scene.add( cube );
+
+    // 画一个圆圈
+    const lineLoop = getLineLoop()
+    scene.add(lineLoop)
+
+    // 添加圆形到场景中
+    // const circle = getCircle();
+    // scene.add(circle);
+
+
+
+
+
+    function animate() {
+        requestAnimationFrame( animate );
+
+        // cube.rotation.x += 0.01;
+        // cube.rotation.y += 0.01;
+
+        renderer.render( scene, camera );
+    }
+
+    animate();
+}
 export const draw = ()=>{
     let camera, scene, renderer, object, stats;
     let planes, planeObjects, planeHelpers;

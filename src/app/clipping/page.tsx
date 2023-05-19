@@ -1,10 +1,10 @@
 'use client'
 import {useEffect} from "react";
-import {draw} from "@/app/clipping/util";
+import {drawCircle} from "@/app/clipping/util";
 
 const Clipping = ()=>{
     useEffect(()=>{
-        draw()
+        drawCircle()
     },[])
     return <div></div>
 }
