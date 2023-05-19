@@ -1,7 +1,19 @@
 import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 
-export const getScene = ()=>{
+export const getTorus = () => {
+    var radius = 2,
+        tube = 0.05,
+        radialSegments = 32,
+        tubularSegments = 200,
+        arc = Math.PI * 2;
+
+    var torusGeometry = new THREE.TorusGeometry(radius, tube, radialSegments, tubularSegments, arc);
+    var torusMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    var torus = new THREE.Mesh(torusGeometry, torusMaterial);
+    return torus;
+}
+export const draw = ()=>{
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
@@ -9,10 +21,15 @@ export const getScene = ()=>{
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
 
-    const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    const cube = new THREE.Mesh( geometry, material );
-    scene.add( cube );
+
+
+    const torus = getTorus();
+    scene.add(torus);
+
+    const turus1 = getTorus();
+    turus1.rotation.x = Math.PI /2
+    scene.add(turus1)
+
 
     camera.position.z = 10;
 
