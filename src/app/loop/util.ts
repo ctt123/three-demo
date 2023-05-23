@@ -331,11 +331,31 @@ export const render3 = () => {
             mouseValue[currentPosition].value = event[mouseValue[currentPosition].client];
         }
     }, false);
+    const pointer = new THREE.Vector2();
+    const animate= () =>{
+        // 通过摄像机和鼠标位置更新射线
+        raycaster.setFromCamera( pointer, camera );
+// 计算物体和射线的焦点
+        const intersects = raycaster.intersectObjects( scene.children );
 
-    function animate() {
+        for ( let i = 0; i < intersects.length; i ++ ) {
+
+            intersects[ i ].object.material.color.set( 0xff0000 );
+
+        }
+
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
     }
+    function onPointerMove( event ) {
+        console.log('------')
+        // 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
+
+        pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+    }
+    window.addEventListener( 'pointermove', onPointerMove );
 
     const changeVisible = () => {
         torus.visible = false;
@@ -359,6 +379,9 @@ export const render3 = () => {
 //         // event.object.material.emissive.set( 0x000000 );
 //
 //     } );
+
+
+    const raycaster = new THREE.Raycaster();
 
     animate();
     changeVisible();
