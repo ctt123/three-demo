@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {createPlane} from "../clipping/util";
 import {Vector3} from "three";
+import {DragControls} from "three/examples/jsm/controls/DragControls";
 
 export const getTorus = (initArc?: number, color?: string) => {
     const radius = 2,
@@ -262,24 +263,26 @@ export const render3 = () => {
     blueShortTorus.rotation.y=-Math.PI/2;
 
     plane.add(blueShortTorus)
-    const system = new THREE.Object3D();
+
 
     const redShortTorus = getTorus(Math.PI/2, 'red')
     redShortTorus.rotation.x = (Math.PI /2)
-    system.rotation.y = -Math.PI/4
-    system.add(redShortTorus)
-    plane.add(system)
+    redShortTorus.rotation.z = (Math.PI/4)
+    plane.add(redShortTorus)
 
-    const ball = getBall()
+    const arrow = getArrow();
+    plane.add(arrow);
+
+    const ball = getBall();
     plane.add(ball)
 
     camera.position.z = 20;
-    // camera.position.y = 3;
-    camera.position.y=2;
-    // camera.rotation.x  = -Math.PI/8;
+    camera.position.y=10;
+    camera.rotation.x= -Math.PI/6
+
 
     var mouseDown = false;
-    var currentPosition = 'z';
+    var currentPosition = 'x';
 
     const mouseValue = {x:{
         position: 'x', // 'x'|'y'|'z'
@@ -334,6 +337,31 @@ export const render3 = () => {
         renderer.render(scene, camera);
     }
 
+    const changeVisible = () => {
+        torus.visible = false;
+        torus1.visible = false;
+
+    }
+
+
+//     const controls = new DragControls( [blueShortTorus], camera, renderer.domElement );
+//
+// // add event listener to highlight dragged objects
+//
+//     controls.addEventListener( 'hoveron',  ( event )=> {
+//         console.log('hover-on', torus)
+//         torus.visible = true;
+//         console.log('torus::', torus)
+//     } );
+//
+//     controls.addEventListener( 'hoveroff', function ( event ) {
+//         console.log('hover-off')
+//         // event.object.material.emissive.set( 0x000000 );
+//
+//     } );
+
     animate();
+    changeVisible();
+
 
 }
