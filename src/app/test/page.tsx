@@ -7,5 +7,6 @@ const Test = () => {
         draw();
     },[])
     return <div></div>
+
 }
 export default Test;

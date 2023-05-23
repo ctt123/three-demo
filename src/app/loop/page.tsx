@@ -1,12 +1,13 @@
 'use client'
 import {useEffect} from "react";
-import {draw} from "./util";
+import {draw,render3} from "./util";
 
 const Loop = () => {
     useEffect(()=>{
-        draw()
+        // draw()
+        render3()
     })
 
-    return <div></div>
+    return <div id={'container'}></div>
 }
 export default Loop
