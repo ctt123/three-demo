@@ -252,6 +252,7 @@ export const render3 = () => {
 
     const torus1 = getTorus();
     torus1.rotation.x = Math.PI /2
+
     plane.add(torus1)
 
     const axesHelper = new THREE.AxesHelper( 5 );
@@ -263,12 +264,17 @@ export const render3 = () => {
     blueShortTorus.rotation.y=-Math.PI/2;
 
     plane.add(blueShortTorus)
-
+    blueShortTorus.onHovered = () => {
+        torus.visible = true
+    }
 
     const redShortTorus = getTorus(Math.PI/2, 'red')
     redShortTorus.rotation.x = (Math.PI /2)
     redShortTorus.rotation.z = (Math.PI/4)
     plane.add(redShortTorus)
+    redShortTorus.onHovered = () => {
+        torus1.visible = true
+    }
 
     const arrow = getArrow();
     plane.add(arrow);
@@ -333,16 +339,6 @@ export const render3 = () => {
     }, false);
     const pointer = new THREE.Vector2();
     const animate= () =>{
-        // 通过摄像机和鼠标位置更新射线
-        raycaster.setFromCamera( pointer, camera );
-// 计算物体和射线的焦点
-        const intersects = raycaster.intersectObjects( scene.children );
-
-        for ( let i = 0; i < intersects.length; i ++ ) {
-
-            intersects[ i ].object.material.color.set( 0xff0000 );
-
-        }
 
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
@@ -354,6 +350,16 @@ export const render3 = () => {
         pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
         pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
+        // 通过摄像机和鼠标位置更新射线
+        raycaster.setFromCamera( pointer, camera );
+// 计算物体和射线的焦点
+        const intersects = raycaster.intersectObjects( scene.children );
+        console.log('intersects:::', intersects)
+        // for ( let i = 0; i < intersects.length; i ++ ) {
+
+        intersects[0]?.object?.onHovered();
+
+        // }
     }
     window.addEventListener( 'pointermove', onPointerMove );
 

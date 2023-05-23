@@ -6,7 +6,7 @@ const Test = () => {
     useEffect(()=>{
         draw();
     },[])
-    return <div></div>
+    return <div id={'root'}></div>
 
 }
 export default Test;
