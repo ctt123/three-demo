@@ -253,15 +253,23 @@ export const render3 = () => {
     torus1.rotation.x = Math.PI /2
     plane.add(torus1)
 
-    const redShortTorus = getTorus(Math.PI/2, 'red')
+    const axesHelper = new THREE.AxesHelper( 5 );
+    plane.add( axesHelper );
+
+
     const blueShortTorus = getTorus(Math.PI/2, 'blue')
     blueShortTorus.rotation.z=-Math.PI/4;
     blueShortTorus.rotation.y=-Math.PI/2;
-    redShortTorus.rotation.x = Math.PI /2
-    // redShortTorus.rotation.y=-Math.PI/4;
-    // redShortTorus.rotation.y=-Math.PI/4;
-    plane.add(redShortTorus)
+
     plane.add(blueShortTorus)
+    const system = new THREE.Object3D();
+
+    const redShortTorus = getTorus(Math.PI/2, 'red')
+    redShortTorus.rotation.x = (Math.PI /2)
+    system.rotation.y = -Math.PI/4
+    system.add(redShortTorus)
+    plane.add(system)
+
     const ball = getBall()
     plane.add(ball)
 
@@ -271,7 +279,7 @@ export const render3 = () => {
     // camera.rotation.x  = -Math.PI/8;
 
     var mouseDown = false;
-    var currentPosition = 'x';
+    var currentPosition = 'z';
 
     const mouseValue = {x:{
         position: 'x', // 'x'|'y'|'z'
