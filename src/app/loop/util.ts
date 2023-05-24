@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {createPlane} from "../clipping/util";
-import {Vector3} from "three";
+import {LineCurve3, Object3D, Vector3} from "three";
 import {DragControls} from "three/examples/jsm/controls/DragControls";
 
 export const getTorus = (initArc?: number, color?: string) => {
@@ -25,7 +25,7 @@ export const getArrow = () => {
 
     const origin = new THREE.Vector3( 0, 0 , 0 );
     const length = 2;
-    const hex = 0xffff00;
+    const hex = 'white';
 
     const arrowHelper = new THREE.ArrowHelper( dir, origin, length, hex,0.5,0.3 );
     return arrowHelper;
@@ -37,6 +37,25 @@ export const getBall = ()  => {
     const ball = new THREE.Mesh(ballGeometry, ballMaterial);
     ball.position.z=2;
     return ball;
+}
+
+export const getArrowGeometry = () => {
+    const geometry = new THREE.CylinderGeometry(
+        0, 0.2, 0.5, 50 );
+    const geometry1 = new THREE.CylinderGeometry(
+        0.1, 0.1, 1, 50 );
+
+    const cylinderMaterial = new THREE.MeshBasicMaterial({ color: 'white' });
+    const body = new THREE.Mesh(geometry1, cylinderMaterial);
+    const head = new THREE.Mesh(geometry, cylinderMaterial);
+// 将箭头添加到场景中
+    const arrow = new Object3D();
+    head.position.y=0.75;
+    arrow.add(body);
+    arrow.add(head);
+
+    return {arrow, body, head};
+
 }
 export const draw = ()=>{
     const scene = new THREE.Scene();
@@ -282,6 +301,8 @@ export const render3 = () => {
             currentMouseValue = mouseValue.y;
             blueShortTorus.visible=false;
             redShortTorus.visible=false;
+            arrow.visible=false;
+            drawPreviousLine();
         }
     }
     blueShortTorus.onPointerOut = () => {
@@ -304,17 +325,38 @@ export const render3 = () => {
             currentMouseValue = mouseValue.x;
             blueShortTorus.visible=false;
             redShortTorus.visible=false;
+            arrow.visible=false;
+            drawPreviousLine();
         }
-
     }
     redShortTorus.onPointerOut = () => {
     }
 
-    const arrow = getArrow();
-    plane.add(arrow);
+    // const arrow = getArrow();
+    // plane.add(arrow);
+
 
     const ball = getBall();
     plane.add(ball)
+
+    const { body: arrow, head: arrowHead} = getArrowGeometry();
+    arrow.rotateX(Math.PI/2)
+    arrow.position.z=0.5
+    plane.add(arrow)
+    arrow.onPointerOver = () => {
+        console.log('111111111111111', arrowHead)
+        if(arrow.visible) {
+            torus1.visible = false;
+            torus.visible = false
+            currentMouseValue = mouseValue.z;
+            blueShortTorus.visible=false;
+            redShortTorus.visible=false;
+            // arrowBody.setColor('yellow'); // 这句无效
+            // arrowHead.setColor('yellow'); // 这句无效
+            // drawPreviousLine();
+        }
+    }
+
 
     camera.position.z = 20;
     camera.position.y=10;
@@ -357,17 +399,21 @@ export const render3 = () => {
     } = mouseValue.x;
 
     const resetTool = () => {
-            if(torus1.visible || torus.visible){
+            if(torus1.visible || torus.visible || arrow.visible){
                 torus1.visible = false;
                 torus.visible = false;
                 blueShortTorus.visible=true;
                 redShortTorus.visible=true;
+                arrow.visible=true;
+                // arrowHead.setColor('white');
+                // arrowBody.setColor('white');
                 currentMouseValue = null;
+
+                splineObject.removeFromParent(scene);
             }
 
     }
     document.addEventListener('mousedown', function(event) {
-        console.log('eventdown::',event)
         mouseDown = true;
         if(currentMouseValue){
             currentMouseValue.value = event[currentMouseValue.client];
@@ -381,7 +427,6 @@ export const render3 = () => {
 
     document.addEventListener('mousemove', function(event) {
         if (mouseDown && currentMouseValue) {
-            console.log('mousemove::', event)
             var rotationSpeed = 0.01; // 鼠标拖动旋转速度
             var delta = event[currentMouseValue.client] - currentMouseValue.value;
             // plane.position[mouseValue[currentPosition].planeRotationPosition] += delta * rotationSpeed;
@@ -399,7 +444,6 @@ export const render3 = () => {
 
     const hovered = {}
     function onPointerMove( event ) {
-        console.log('------')
         // 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
 
         pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -409,7 +453,6 @@ export const render3 = () => {
         raycaster.setFromCamera( pointer, camera );
 // 计算物体和射线的焦点
         const intersects = raycaster.intersectObjects( scene.children );
-        console.log('intersects:::', intersects, 'hovered:::::', hovered)
         // for ( let i = 0; i < intersects.length; i ++ ) {
 
         Object.keys(hovered).forEach((key) => {
@@ -441,29 +484,34 @@ export const render3 = () => {
         torus1.visible = false;
 
     }
+    var ballPosition = new THREE.Vector3();
+    var planePosition = new THREE.Vector3();
+    let splineObject;
+    const drawPreviousLine = () => {
+        ball.getWorldPosition(ballPosition);
+        plane.getWorldPosition(planePosition);
 
 
-//     const controls = new DragControls( [blueShortTorus], camera, renderer.domElement );
-//
-// // add event listener to highlight dragged objects
-//
-//     controls.addEventListener( 'hoveron',  ( event )=> {
-//         console.log('hover-on', torus)
-//         torus.visible = true;
-//         console.log('torus::', torus)
-//     } );
-//
-//     controls.addEventListener( 'hoveroff', function ( event ) {
-//         console.log('hover-off')
-//         // event.object.material.emissive.set( 0x000000 );
-//
-//     } );
+        const curve = new LineCurve3( planePosition, ballPosition)
+
+        const points = curve.getPoints( 50 );
+        const geometry = new THREE.BufferGeometry().setFromPoints( points );
+
+        const material = new THREE.LineBasicMaterial( { color: 'grey' } );
+
+// Create the final object to add to the scene
+        splineObject = new THREE.Line( geometry, material );
+
+
+        // 直线
+        scene.add(splineObject);
+    }
+
 
 
     const raycaster = new THREE.Raycaster();
 
     animate();
     changeVisible();
-
 
 }
