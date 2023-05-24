@@ -59,7 +59,8 @@ export const draw = () =>{
         raycaster.setFromCamera(mouse, camera)
         intersects = raycaster.intersectObjects(scene.children, true)
         console.log(
-            'intersects::', intersects
+            'intersects::', intersects,
+            'hovered::', hovered
         )
         // If a previously hovered item is not among the hits we must call onPointerOut
         Object.keys(hovered).forEach((key) => {

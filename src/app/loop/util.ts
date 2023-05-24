@@ -251,7 +251,17 @@ export const render3 = () => {
     plane.add(torus);
 
     const torus1 = getTorus();
-    torus1.rotation.x = Math.PI /2
+    torus1.rotation.x = Math.PI /2;
+    torus1.onPointerOver=()=>{
+        if(torus1.visible) {
+            torus1.visible = true;
+        }
+    }
+    torus.onPointerOver=()=>{
+        if(torus.visible) {
+            torus.visible = true;
+        }
+    }
 
     plane.add(torus1)
 
@@ -264,16 +274,40 @@ export const render3 = () => {
     blueShortTorus.rotation.y=-Math.PI/2;
 
     plane.add(blueShortTorus)
-    blueShortTorus.onHovered = () => {
-        torus.visible = true
+    blueShortTorus.onPointerOver = () => {
+        console.log('----------------------------------------')
+        if(blueShortTorus.visible){
+            torus.visible = true
+            torus1.visible = false
+            currentMouseValue = mouseValue.y;
+            blueShortTorus.visible=false;
+            redShortTorus.visible=false;
+        }
+    }
+    blueShortTorus.onPointerOut = () => {
+        // if(!mouseDown){
+        //     torus1.visible = false;
+        //     torus.visible = false;
+        //     blueShortTorus.visible=true;
+        //     redShortTorus.visible=true;
+        // }
     }
 
     const redShortTorus = getTorus(Math.PI/2, 'red')
     redShortTorus.rotation.x = (Math.PI /2)
     redShortTorus.rotation.z = (Math.PI/4)
     plane.add(redShortTorus)
-    redShortTorus.onHovered = () => {
-        torus1.visible = true
+    redShortTorus.onPointerOver = () => {
+        if(redShortTorus.visible) {
+            torus1.visible = true
+            torus.visible = false
+            currentMouseValue = mouseValue.x;
+            blueShortTorus.visible=false;
+            redShortTorus.visible=false;
+        }
+
+    }
+    redShortTorus.onPointerOut = () => {
     }
 
     const arrow = getArrow();
@@ -288,7 +322,6 @@ export const render3 = () => {
 
 
     var mouseDown = false;
-    var currentPosition = 'x';
 
     const mouseValue = {x:{
         position: 'x', // 'x'|'y'|'z'
@@ -311,30 +344,50 @@ export const render3 = () => {
             value: 0,
             client: 'clientY',
             planeRotationPosition: 'z',
-            change: (plane, value)=>{
+            change: (plane, value)=> {
                 plane.position.z += value;
             }
         }}
+    var currentMouseValue: null | {
+        position: 'x' | 'y' | 'z';
+        value: number;
+        client: 'clientY' | 'clientX';
+        planeRotationPosition: 'x' | 'y' | 'z';
+        change: (plane, value) => void;
+    } = mouseValue.x;
 
+    const resetTool = () => {
+            if(torus1.visible || torus.visible){
+                torus1.visible = false;
+                torus.visible = false;
+                blueShortTorus.visible=true;
+                redShortTorus.visible=true;
+                currentMouseValue = null;
+            }
+
+    }
     document.addEventListener('mousedown', function(event) {
         console.log('eventdown::',event)
         mouseDown = true;
-        mouseValue[currentPosition].value = event[mouseValue[currentPosition].client];
+        if(currentMouseValue){
+            currentMouseValue.value = event[currentMouseValue.client];
+        }
     }, false);
 
     document.addEventListener('mouseup', function(event) {
         mouseDown = false;
+        resetTool();
     }, false);
 
     document.addEventListener('mousemove', function(event) {
-        if (mouseDown) {
+        if (mouseDown && currentMouseValue) {
             console.log('mousemove::', event)
             var rotationSpeed = 0.01; // 鼠标拖动旋转速度
-            var delta = event[mouseValue[currentPosition].client] - mouseValue[currentPosition].value;
+            var delta = event[currentMouseValue.client] - currentMouseValue.value;
             // plane.position[mouseValue[currentPosition].planeRotationPosition] += delta * rotationSpeed;
             // plane.rotation[mouseValue[currentPosition].planeRotationPosition] += delta * rotationSpeed;
-            mouseValue[currentPosition].change(plane, delta * rotationSpeed)
-            mouseValue[currentPosition].value = event[mouseValue[currentPosition].client];
+            currentMouseValue.change(plane, delta * rotationSpeed)
+            currentMouseValue.value = event[currentMouseValue.client];
         }
     }, false);
     const pointer = new THREE.Vector2();
@@ -343,6 +396,8 @@ export const render3 = () => {
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
     }
+
+    const hovered = {}
     function onPointerMove( event ) {
         console.log('------')
         // 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
@@ -354,10 +409,28 @@ export const render3 = () => {
         raycaster.setFromCamera( pointer, camera );
 // 计算物体和射线的焦点
         const intersects = raycaster.intersectObjects( scene.children );
-        console.log('intersects:::', intersects)
+        console.log('intersects:::', intersects, 'hovered:::::', hovered)
         // for ( let i = 0; i < intersects.length; i ++ ) {
 
-        intersects[0]?.object?.onHovered();
+        Object.keys(hovered).forEach((key) => {
+            const hit = intersects.find((hit) => hit.object.uuid === key)
+            if (hit === undefined) {
+                const hoveredItem = hovered[key]
+                if (hoveredItem.object.onPointerOver) {
+                    hoveredItem.object?.onPointerOut&&hoveredItem.object?.onPointerOut(hoveredItem)}
+                delete hovered[key]
+            }
+        })
+
+        intersects.forEach((hit) => {
+            // If a hit has not been flagged as hovered we must call onPointerOver
+            if (!hovered[hit.object.uuid]) {
+                hovered[hit.object.uuid] = hit
+                if (hit.object.onPointerOver) hit.object.onPointerOver(hit)
+            }
+            // Call onPointerMove
+            if (hit.object.onPointerMove) hit.object.onPointerMove(hit)
+        })
 
         // }
     }
