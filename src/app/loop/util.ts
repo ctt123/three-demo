@@ -46,15 +46,16 @@ export const getArrowGeometry = () => {
         0.1, 0.1, 1, 50 );
 
     const cylinderMaterial = new THREE.MeshBasicMaterial({ color: 'white' });
-    const body = new THREE.Mesh(geometry1, cylinderMaterial);
+    const arrow = new THREE.Mesh(geometry1, cylinderMaterial);
     const head = new THREE.Mesh(geometry, cylinderMaterial);
 // 将箭头添加到场景中
-    const arrow = new Object3D();
+//     const arrow = new THREE.Group();
     head.position.y=0.75;
-    arrow.add(body);
-    arrow.add(head);
+    // arrow.add(body);
+    // arrow.add(head);
+    arrow.add(head)
 
-    return {arrow, body, head};
+    return {arrow, head};
 
 }
 export const draw = ()=>{
@@ -339,7 +340,7 @@ export const render3 = () => {
     const ball = getBall();
     plane.add(ball)
 
-    const { body: arrow, head: arrowHead} = getArrowGeometry();
+    const { arrow, body: arrowBody, head: arrowHead} = getArrowGeometry();
     arrow.rotateX(Math.PI/2)
     arrow.position.z=0.5
     plane.add(arrow)
@@ -371,7 +372,8 @@ export const render3 = () => {
         client: 'clientX',
         planeRotationPosition: 'y',
             change: (plane, value)=>{
-                plane.rotation.y += value;
+                // plane.rotation.y += value;
+                plane.rotateY(value)
             }
     },y:{
             position: 'y', // 'x'|'y'|'z'
@@ -379,7 +381,8 @@ export const render3 = () => {
             client: 'clientY',
             planeRotationPosition: 'x',
             change: (plane, value)=>{
-                plane.rotation.x += value;
+                // plane.rotation.x += value;
+                plane.rotateX(value)
             }
         },z:{
             position: 'z', // 'x'|'y'|'z'
@@ -387,7 +390,7 @@ export const render3 = () => {
             client: 'clientY',
             planeRotationPosition: 'z',
             change: (plane, value)=> {
-                plane.position.z += value;
+                plane.translateOnAxis(new Vector3(0,0,1),value);
             }
         }}
     var currentMouseValue: null | {
