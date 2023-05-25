@@ -411,8 +411,12 @@ export const render3 = () => {
                 // arrowHead.setColor('white');
                 // arrowBody.setColor('white');
                 currentMouseValue = null;
+                if(splineObject){
+                    splineObject.removeFromParent(scene);
+                    splineObject=null;
+                }
 
-                splineObject.removeFromParent(scene);
+
             }
 
     }
